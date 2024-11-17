@@ -1,10 +1,26 @@
-// src/screens/VendorDashboard.tsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { useDropOffContext } from '../services/DropOffContext';
+import { calculateHash } from '../services/hashUtils';
 
 const VendorDashboard: React.FC = () => {
   const { dropOffs } = useDropOffContext();
+  const [hashedDropOffs, setHashedDropOffs] = useState<
+    { userId: string; material: string; hash: string }[]
+  >([]);
+
+  useEffect(() => {
+    const generateHashes = async () => {
+      const updatedDropOffs = await Promise.all(
+        dropOffs.map(async (item) => ({
+          ...item,
+          hash: await calculateHash(item.userId + item.material),
+        }))
+      );
+      setHashedDropOffs(updatedDropOffs);
+    };
+    generateHashes();
+  }, [dropOffs]);
 
   const totalDropOffs = dropOffs.length;
   const uniqueUsers = [...new Set(dropOffs.map((item) => item.userId))].length;
@@ -14,12 +30,25 @@ const VendorDashboard: React.FC = () => {
     return acc;
   }, {} as Record<string, number>);
 
+  const trimHash = (hash: string) => hash.slice(0, 8);
+
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Hi, Vendor!</Text>
       <View style={styles.cardsContainer}>
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Total Drop-Offs</Text>
+          <Text style={styles.cardTitle}>Cups Available</Text>
+          <Text style={styles.cardValue}>58</Text>
+        </View>
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Cups Used</Text>
+          <Text style={styles.cardValue}>{uniqueUsers + 1}</Text>
+        </View>
+        </View>
+        
+      <View style={styles.cardsContainer}>
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Returns</Text>
           <Text style={styles.cardValue}>{totalDropOffs}</Text>
         </View>
         <View style={styles.card}>
@@ -29,12 +58,13 @@ const VendorDashboard: React.FC = () => {
       </View>
       <Text style={styles.subHeader}>Recent Activity</Text>
       <FlatList
-        data={dropOffs}
+        data={hashedDropOffs}
         keyExtractor={(item, index) => `${item.userId}-${index}`}
         renderItem={({ item }) => (
           <View style={styles.itemContainer}>
-            <Text style={styles.itemText}>User ID: {item.userId}</Text>
-            <Text style={styles.itemText}>Material: {item.material}</Text>
+            <Text style={styles.itemText}>Platform: {item.userId}</Text>
+            {/* <Text style={styles.itemText}>Material: {item.material}</Text> */}
+            <Text style={styles.itemText}>User: {trimHash(item.hash)}</Text>
           </View>
         )}
       />

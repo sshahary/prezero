@@ -21,8 +21,8 @@ const App: React.FC = () => {
 
               if (route.name === 'Scanner') {
                 iconName = 'qr-code';
-              } else if (route.name === 'Materials') {
-                iconName = 'layers';
+              // } else if (route.name === 'Materials') {
+              //   iconName = 'layers';
               } else if (route.name === 'Vendor Dashboard') {
                 iconName = 'bar-chart';
               } else {
@@ -36,7 +36,7 @@ const App: React.FC = () => {
           })}
         >
           <Tab.Screen name="Scanner" component={ScannerScreen} />
-          <Tab.Screen name="Materials" component={MaterialList} />
+          {/* <Tab.Screen name="Materials" component={MaterialList} /> */}
           <Tab.Screen name="Vendor Dashboard" component={VendorDashboard} />
         </Tab.Navigator>
       </NavigationContainer>
